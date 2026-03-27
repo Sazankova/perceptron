@@ -1,0 +1,43 @@
+import pandas as pd
+import numpy as np
+from sklearn.linear_model import Perceptron
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score
+
+# --- ЗАГРУЗКА ДАННЫХ ИЗ ВАШЕГО РЕПОЗИТОРИЯ ---
+train_url = "https://raw.githubusercontent.com/Sazankova/perceptron/main/perceptron-train.csv"
+test_url = "https://raw.githubusercontent.com/Sazankova/perceptron/main/perceptron-test.csv"
+
+# Загружаем данные (в файлах нет заголовков)
+train_data = pd.read_csv(train_url, header=None)
+test_data = pd.read_csv(test_url, header=None)
+
+# --- РАЗДЕЛЯЕМ ПРИЗНАКИ И ЦЕЛЕВУЮ ПЕРЕМЕННУЮ ---
+# Целевая переменная в первом столбце (индекс 0)
+# Признаки — во втором и третьем столбцах (индексы 1 и 2)
+X_train = train_data[[1, 2]].values
+y_train = train_data[0].values
+
+X_test = test_data[[1, 2]].values
+y_test = test_data[0].values
+
+# --- 1. ОБУЧАЕМ ПЕРСЕПТРОН БЕЗ НОРМАЛИЗАЦИИ ---
+perceptron = Perceptron(random_state=241)
+perceptron.fit(X_train, y_train)
+y_pred = perceptron.predict(X_test)
+accuracy_before = accuracy_score(y_test, y_pred)
+
+# --- 2. НОРМАЛИЗУЕМ ПРИЗНАКИ ---
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# --- 3. ОБУЧАЕМ ПЕРСЕПТРОН НА НОРМАЛИЗОВАННЫХ ДАННЫХ ---
+perceptron_scaled = Perceptron(random_state=241)
+perceptron_scaled.fit(X_train_scaled, y_train)
+y_pred_scaled = perceptron_scaled.predict(X_test_scaled)
+accuracy_after = accuracy_score(y_test, y_pred_scaled)
+
+# --- 4. ВЫЧИСЛЯЕМ РАЗНОСТЬ И ВЫВОДИМ ОТВЕТ ---
+difference = accuracy_after - accuracy_before
+print(f"{difference:.3f}")
